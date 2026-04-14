@@ -71,7 +71,7 @@ import type { GetMeta } from './meta/api.js';
 import type { PostPlanChange, PostPlanExtendTrial } from './plans/http.api.js';
 import type { GetProvider, GetProviders, GetPublicProvider, GetPublicProviders } from './providers/api.js';
 import type { AllPublicProxy } from './proxy/http.api.js';
-import type { GetPublicRecords, PatchPublicPruneRecords } from './record/api.js';
+import type { GetConnectionRecordModels, GetConnectionRecords, GetPublicRecords, PatchPublicPruneRecords } from './record/api.js';
 import type { GetPublicScriptsConfig } from './scripts/http.api.js';
 import type {
     GetSharedCredentialsProvider,
@@ -161,6 +161,8 @@ export type PrivateApiEndpoints =
     | GetConnections
     | GetConnectionsCount
     | GetConnection
+    | GetConnectionRecordModels
+    | GetConnectionRecords
     | GetInvite
     | GetMeta
     | GetEmailByExpiredToken
