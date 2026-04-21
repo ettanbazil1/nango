@@ -159,19 +159,21 @@ export const FunctionsOne: React.FC = () => {
                                     <Download />
                                 </Button>
                             )}
-                            <Button
-                                variant="secondary"
-                                size="sm"
-                                onClick={() => {
-                                    openPlaygroundWithContext({
-                                        integration: integrationData.integration.unique_key,
-                                        functionName: func.name,
-                                        functionType: func.type as 'action' | 'sync'
-                                    });
-                                }}
-                            >
-                                Playground <ExternalLink />
-                            </Button>
+                            {func.enabled && (
+                                <Button
+                                    variant="secondary"
+                                    size="sm"
+                                    onClick={() => {
+                                        openPlaygroundWithContext({
+                                            integration: integrationData.integration.unique_key,
+                                            functionName: func.name,
+                                            functionType: func.type as 'action' | 'sync'
+                                        });
+                                    }}
+                                >
+                                    Playground <ExternalLink />
+                                </Button>
+                            )}
                             <FunctionSwitch flow={func} integration={integrationData.integration} />
                         </div>
                     </div>
