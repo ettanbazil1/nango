@@ -1,7 +1,7 @@
 import { MantineProvider, createTheme } from '@mantine/core';
 import { TooltipProvider } from '@radix-ui/react-tooltip';
 import { useEffect, useRef } from 'react';
-import { Navigate, RouterProvider, useParams } from 'react-router-dom';
+import { Navigate, RouterProvider, useLocation, useParams } from 'react-router-dom';
 import { ToastContainer } from 'react-toastify';
 import { useLocalStorage } from 'react-use';
 import { Toaster } from 'sonner';
@@ -67,6 +67,14 @@ const GettingStartedRoute = () => {
     }
 
     return globalEnv.isCloud ? <GettingStarted /> : <ClassicGettingStarted />;
+};
+
+const LEGACY_CONNECTION_HASH_TABS = new Set(['auth', 'syncs', 'records', 'settings']);
+const ConnectionShowIndexRedirect = () => {
+    const { hash } = useLocation();
+    const candidate = hash.slice(1);
+    const target = LEGACY_CONNECTION_HASH_TABS.has(candidate) ? candidate : 'auth';
+    return <Navigate to={target} replace />;
 };
 
 const RedirectWithEnv = ({ path }: { path: string }) => {
@@ -239,7 +247,7 @@ const router = sentryCreateBrowserRouter([
                                 children: [
                                     {
                                         index: true,
-                                        element: <Navigate to="auth" replace />
+                                        element: <ConnectionShowIndexRedirect />
                                     },
                                     {
                                         path: 'auth',
