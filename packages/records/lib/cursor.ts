@@ -1,10 +1,12 @@
+import { z } from 'zod';
+
 export interface Cursor {
     sort: string;
     id: string;
 }
 
-const ISO_TIMESTAMP_RE = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d+)?(?:Z|[+-]\d{2}:\d{2})$/;
-const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+const cursorSortSchema = z.iso.datetime({ offset: true });
+const cursorIdSchema = z.uuid();
 
 export const Cursor = {
     new({ last_modified_at, id }: { last_modified_at: string; id: string }): string {
@@ -13,8 +15,10 @@ export const Cursor = {
     from(encoded: string): Cursor | undefined {
         const decoded = Buffer.from(encoded, 'base64').toString('ascii');
         const [cursorSort, cursorId] = decoded.split('||');
-        if (cursorSort && cursorId && ISO_TIMESTAMP_RE.test(cursorSort) && UUID_RE.test(cursorId)) {
-            return { sort: cursorSort, id: cursorId };
+        const sortResult = cursorSortSchema.safeParse(cursorSort);
+        const idResult = cursorIdSchema.safeParse(cursorId);
+        if (sortResult.success && idResult.success) {
+            return { sort: sortResult.data, id: idResult.data };
         }
         return undefined;
     }
