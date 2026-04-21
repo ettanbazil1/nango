@@ -221,7 +221,7 @@ export function ComboboxSelect<T extends string = string>(props: ComboboxProps<T
     const trigger = props.allowMultiple ? (
         <Button
             loading={props.loading}
-            disabled={disabled || options.length === 0}
+            disabled={disabled || (options.length === 0 && !footer)}
             variant="ghost"
             size="lg"
             className={cn('border border-border-muted', isDirty && 'bg-btn-tertiary-press', open ? 'bg-bg-subtle' : 'hover:bg-dropdown-bg-hover', className)}
