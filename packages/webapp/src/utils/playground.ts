@@ -31,5 +31,9 @@ export function openPlaygroundWithContext(override: PlaygroundContextOverride) {
         connectionSearch: ''
     };
 
-    usePlaygroundStore.getState().setState(next);
+    const store = usePlaygroundStore.getState();
+    // Detach (don't abort) any in-flight run so it completes silently without
+    // writing stale results over the newly-opened context.
+    store.detachActiveRun?.();
+    store.setState(next);
 }

@@ -43,7 +43,7 @@ import { defaultPlaygroundState, usePlaygroundStore } from './store/playground';
 describe('useStore', () => {
     afterEach(() => {
         useStore.setState({ env: 'dev' });
-        usePlaygroundStore.setState({ ...defaultPlaygroundState, abortActiveRun: null });
+        usePlaygroundStore.setState({ ...defaultPlaygroundState, abortActiveRun: null, detachActiveRun: null });
         Object.keys(storageState.localStore).forEach((k) => {
             Reflect.deleteProperty(storageState.localStore, k);
         });

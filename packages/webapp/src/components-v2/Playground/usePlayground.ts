@@ -26,6 +26,7 @@ export function usePlayground(inputFields: InputField[]) {
     const setRunning = usePlaygroundStore((s) => s.setRunning);
     const setInputErrors = usePlaygroundStore((s) => s.setInputErrors);
     const setAbortActiveRun = usePlaygroundStore((s) => s.setAbortActiveRun);
+    const setDetachActiveRun = usePlaygroundStore((s) => s.setDetachActiveRun);
 
     const runAbortRef = useRef<AbortController | null>(null);
 
@@ -37,10 +38,15 @@ export function usePlayground(inputFields: InputField[]) {
             setResult(null);
         });
 
+        setDetachActiveRun(() => {
+            runAbortRef.current = null;
+        });
+
         return () => {
             setAbortActiveRun(null);
+            setDetachActiveRun(null);
         };
-    }, [setAbortActiveRun, setPendingOperationId, setResult, setRunning]);
+    }, [setAbortActiveRun, setDetachActiveRun, setPendingOperationId, setResult, setRunning]);
 
     // --- useQuery: poll operation status when pendingOperationId is set ---
     const { data: operationData } = useQuery({
@@ -88,6 +94,7 @@ export function usePlayground(inputFields: InputField[]) {
 
         const controller = new AbortController();
         runAbortRef.current = controller;
+        const isCurrent = () => runAbortRef.current === controller;
         setRunning(true);
         setResult(null);
         setInputErrors({});
@@ -101,6 +108,7 @@ export function usePlayground(inputFields: InputField[]) {
             if (playgroundFunctionType === 'action') {
                 const parseResult = validateAndParseInputs(inputFields, inputValues);
                 if (!parseResult.ok) {
+                    if (!isCurrent()) return;
                     setInputErrors(parseResult.errors);
                     setResult({ success: false, state: 'invalid_input', data: { error: 'Invalid input', fields: parseResult.errors }, durationMs: 0 });
                     setRunning(false);
@@ -140,6 +148,7 @@ export function usePlayground(inputFields: InputField[]) {
 
             // If the trigger failed immediately, surface the error right away.
             if (!response.ok) {
+                if (!isCurrent()) return;
                 setPendingOperationId(null);
                 setResult({ success: false, data: triggerData, durationMs: triggerDurationMs });
                 setRunning(false);
@@ -149,6 +158,7 @@ export function usePlayground(inputFields: InputField[]) {
             // For actions, the full output is already in triggerData.
             // Don't block the UI on log discovery.
             if (playgroundFunctionType === 'action') {
+                if (!isCurrent()) return;
                 setPendingOperationId(null);
                 setResult({ success: true, data: triggerData, durationMs: triggerDurationMs });
                 setRunning(false);
@@ -176,6 +186,7 @@ export function usePlayground(inputFields: InputField[]) {
             }
 
             if (!operation) {
+                if (!isCurrent()) return;
                 setPendingOperationId(null);
                 setResult({ success: true, state: 'operation_not_found', data: triggerData, durationMs: triggerDurationMs });
                 setRunning(false);
@@ -184,8 +195,10 @@ export function usePlayground(inputFields: InputField[]) {
 
             // Syncs: hand off to useQuery for status polling.
             // running stays true — useQuery's useEffect will set it to false on terminal state.
+            if (!isCurrent()) return;
             setPendingOperationId(operation.id);
         } catch (err: unknown) {
+            if (!isCurrent()) return;
             if (err instanceof Error && err.name === 'AbortError') {
                 setPendingOperationId(null);
                 setResult(null);
@@ -195,7 +208,9 @@ export function usePlayground(inputFields: InputField[]) {
             }
             setRunning(false);
         } finally {
-            runAbortRef.current = null;
+            if (runAbortRef.current === controller) {
+                runAbortRef.current = null;
+            }
         }
     }, [
         playgroundIntegration,

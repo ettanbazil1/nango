@@ -31,6 +31,7 @@ export interface PlaygroundState {
 
 interface PlaygroundStore extends PlaygroundState {
     abortActiveRun: (() => void) | null;
+    detachActiveRun: (() => void) | null;
     setOpen: (value: boolean) => void;
     setIntegration: (value: string | null) => void;
     setConnection: (value: string | null) => void;
@@ -45,6 +46,7 @@ interface PlaygroundStore extends PlaygroundState {
     clearInputError: (name: string) => void;
     setConnectionSearch: (search: string) => void;
     setAbortActiveRun: (abortActiveRun: (() => void) | null) => void;
+    setDetachActiveRun: (detachActiveRun: (() => void) | null) => void;
     reset: (keepOpen?: boolean) => void;
     setState: (value: PlaygroundState) => void;
 }
@@ -68,6 +70,7 @@ export const usePlaygroundStore = create<PlaygroundStore>()(
         (set) => ({
             ...defaultPlaygroundState,
             abortActiveRun: null,
+            detachActiveRun: null,
 
             setOpen: (isOpen) => set({ isOpen }),
 
@@ -100,6 +103,8 @@ export const usePlaygroundStore = create<PlaygroundStore>()(
             setConnectionSearch: (connectionSearch) => set({ connectionSearch }),
 
             setAbortActiveRun: (abortActiveRun) => set({ abortActiveRun }),
+
+            setDetachActiveRun: (detachActiveRun) => set({ detachActiveRun }),
 
             reset: (keepOpen = true) => set((s) => ({ ...defaultPlaygroundState, isOpen: keepOpen ? s.isOpen : false })),
 
